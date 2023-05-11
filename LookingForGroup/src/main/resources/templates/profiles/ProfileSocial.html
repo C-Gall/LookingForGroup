@@ -1,0 +1,220 @@
+<!-- src/main/resources/templates/profiles/ProfileSocial.html -->
+<!DOCTYPE HTML>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title th:text="'Viewing Profile - ID:' + ${profile.id}"></title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/css/bootstrap-select.min.css"/>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+</head>
+
+<div th:replace="~{fragments/Header :: header}"></div>
+
+<body style="padding-top: 3.5rem; padding-bottom: 3.5rem;">	
+	<div class="d-flex p-2 justify-content-center text-center">
+		<h1>Viewing Socials</h1>
+	</div>
+	
+	<div class="table-responsive justify-content-center text-center">
+		<table class = "mx-auto w-auto">
+			<tr>
+				<th>
+					<a href="/profile/social?form=friended">
+						<button class="btn" style="background-color:#CEA848; color:white;">Friends</button>
+					</a>
+				</th>
+				<th>
+					<a href="/profile/social?form=sent">
+						<button class="btn" style="background-color:#CEA848; color:white;">Sent Friend Requests</button>
+					</a>
+				</th>
+				<th>
+					<a href="/profile/social?form=received">
+						<button class="btn" style="background-color:#CEA848; color:white;">Received Friend Requests</button>
+					</a>
+				</th>
+				<th>
+					<a href="/profile/social?form=blocked">
+						<button class="btn" style="background-color:#CEA848; color:white;">Blocked</button>
+					</a>
+				</th>
+			</tr>
+			<tr>
+				<td colspan="4">
+					<table id="profileContent" class = "mx-auto w-auto" th:if="${param.form[0] == 'friended'}">
+						<tr>
+							<th style="width: 33.33%">
+								Username
+							</th>
+							<th style="width: 33.33%">
+								Accepted Date
+							</th>
+							<th style="width: 33.33%">
+								
+							</th>
+							<th>
+								
+							</th>
+						</tr>
+						<tr th:each="friend : ${profile.friends}">
+							<td>
+								<a th:text="${friend.recipientUsername}" th:href="@{'/profile' (id=${friend.recipientId})}">Link</a>
+							</td>
+							<td th:text="${friend.sentDate}">Date</td>
+							<td>
+								<button class="btn" style="background-color:#CEA848; color:white;"
+								data-bs-toggle="modal" th:attr="data-bs-target='#unfriendModal'+${friend.recipientId}">Unfriend</button>
+							</td>
+							<td>
+							<!-- Warning modal for removing a friend. -->
+								<div class="modal fade" th:id="'unfriendModal'+${friend.recipientId}" tabindex="-1" role="dialog" aria-labelledby="unfriendModalLabel" aria-hidden="true">
+									<div class="modal-dialog" role="document">
+										<div class="modal-content">
+											<form action="#" th:action="@{'/profile/removefriend' (friend = ${friend.recipientId})}" method="post">
+												<div class="modal-header">
+											        <button type="button" style="background-color:red; color:white;" class="close" data-bs-dismiss="modal" aria-label="Close">
+											         	<span aria-hidden="true">&times;</span>
+											        </button>					
+												</div>
+												<div class="modal-body">
+													<h5 class="modal-title" id="unfriendModalLabel" th:text="'Are you sure you wish to unfriend ' + ${friend.recipientUsername} + '?'"></h5>
+												</div>
+												<div class="modal-footer">
+							        				<button type="submit" style="background-color:#CEA848; color:white;" class="btn btn-primary">Unfriend</button>
+							        				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>						
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</table>
+					<table id="profileContent" class = "mx-auto w-auto" th:if="${param.form[0] == 'sent'}">
+						<tr>
+							<th style="width: 33.33%">
+								Username
+							</th>
+							<th style="width: 33.33%">
+								Sent Date
+							</th>
+							<th style="width: 33.33%">
+								
+							</th>
+						</tr>
+						<tr th:each="sent : ${profile.sentFriendRequests}">
+							<td>
+								<a th:text="${sent.recipientUsername}" th:href="@{'/profile' (id=${sent.recipientId})}">Link</a>
+							</td>
+							<td th:text="${sent.sentDate}">Date</td>
+							<td>
+								<form action="#" th:action="@{'/profile/cancelrequest' (recipient = ${sent.recipientId})}" method="post">
+									<button type="submit" class="btn" style="background-color:#CEA848; color:white;">Cancel</button>
+								</form>
+							</td>
+						</tr>
+					</table>
+					<table id="profileContent" class = "mx-auto w-auto" th:if="${param.form[0] == 'received'}">
+						<tr>
+							<th style="width: 25%">
+								Username
+							</th>
+							<th style="width: 25%">
+								Received Date
+							</th>
+							<th style="width: 25%">
+								
+							</th>
+							<th style="width: 25%">
+								
+							</th>
+						</tr>
+						<tr th:each="sent : ${profile.receivedFriendRequests}">
+							<td>
+								<a th:text="${sent.senderUsername}" th:href="@{'/profile' (id=${sent.recipientId})}">Link</a>
+							</td>
+							<td th:text="${sent.sentDate}">Date</td>
+							<td>
+								<form action="#" th:action="@{'/profile/acceptrequest' (sender = ${sent.senderId})}" method="post">
+									<button type="submit" class="btn" style="background-color:#CEA848; color:white;">Accept</button>
+								</form>
+							</td>
+							<td>
+								<form action="#" th:action="@{'/profile/declinerequest' (sender = ${sent.senderId})}" method="post">
+									<button type="submit" class="btn" style="background-color:#CEA848; color:white;">Decline</button>
+								</form>
+							</td>
+						</tr>
+					</table>
+					<table id="profileContent" class = "mx-auto w-auto" th:if="${param.form[0] == 'blocked'}">
+						<tr>
+							<th style="width: 33.33%">
+								Username
+							</th>
+							<th style="width: 33.33%">
+								Blocked Date
+							</th>
+							<th style="width: 33.33%">
+								
+							</th>
+							<th>
+								
+							</th>
+						</tr>
+						<tr th:each="block : ${profile.blocked}">
+							<td th:text="${block.recipientUsername}"/>
+							<td th:text="${block.sentDate}">Date</td>
+							<td>
+								<button class="btn" style="background-color:#CEA848; color:white;"
+								data-bs-toggle="modal" th:attr="data-bs-target='#unblockModal'+${block.recipientId}">Unblock</button>
+							</td>
+							<td>
+								<!-- Warning modal for unblocking. -->
+								<div class="modal fade" th:id="'unblockModal'+${block.recipientId}" tabindex="-1" role="dialog" aria-labelledby="unblockModalLabel" aria-hidden="true">
+									<div class="modal-dialog" role="document">
+										<div class="modal-content">
+											<form action="#" th:action="@{'/profile/unblock' (id = ${block.recipientId})}" method="post">
+												<div class="modal-header">
+											        <button type="button" style="background-color:red; color:white;" class="close" data-bs-dismiss="modal" aria-label="Close">
+											         	<span aria-hidden="true">&times;</span>
+											        </button>					
+												</div>
+												<div class="modal-body">
+													<h5 class="modal-title" id="unblockModalLabel" th:text="'Are you sure you wish to unblock ' + ${block.recipientUsername} + '?'"></h5>
+												</div>
+												<div class="modal-footer">
+							        				<button type="submit" class="btn" style="background-color:#CEA848; color:white;">Unblock</button>
+							        				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>						
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</td>						
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+</body>
+
+<div th:replace="~{fragments/Footer :: footer}"></div>
+
+<script>	
+	function updateUnfriendVals(username, id) {
+		document.getElementById("unfriendModalLabel").innerHTML = "Are you sure you want to unfriend " + username + "?";
+	}
+	
+	function updateUnblockVals(username, id) {
+
+	}
+
+</script>
+
+</html>

@@ -1,0 +1,183 @@
+<!-- src/main/resources/templates/accounts/Account.html -->
+<!DOCTYPE HTML>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>LFG - Lobby Creation</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/css/bootstrap-select.min.css"/>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+	
+	<!-- Needed for the specialized select! -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/js/bootstrap-select.min.js"></script>
+</head>
+
+<div th:replace="~{fragments/Header :: header}"></div>
+
+<body style="padding-top: 3.5rem; padding-bottom: 3.5rem;" onload="toggleInit()">	
+	<form action="#" th:action="@{/lobby/create}" th:object="${webLobby}" method="post">
+		<table>
+			<tr>
+				<td id="formInfo">Lobby Name: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{lobbyName}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('lobbyName')}" th:errors="*{lobbyName}"></td>
+			</tr>
+			<tr>
+				<td id="formInfo">System: </td>
+				<td id="formField" class="selectCheckbox">
+					<select class="form-control" th:field="*{system}">
+						<option value=""/></option>
+						<option th:each="sys : ${systems}" th:value="${sys}" th:text="${sys}"></option>
+					</select>
+				</td>
+				<td id="formError" th:if="${#fields.hasErrors('system')}" th:errors="*{system}"></td>
+			</tr>
+			<tr>
+				<td id="formInfo">Tags: </td>
+				<td id="formField">
+					<select class="selectpicker" th:field="*{lobbyTags}" multiple>
+						<option th:each="tag : ${tags}" th:value="${tag}" th:text="${tag}"></option>
+					</select>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td id="formInfo">Max Players: </td>
+				<td id="formField"><input type="number" class="form-control" th:field="*{maxPlayers}" value="5" min="2" max="20"></td>
+				<td id="formError" th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}"></td>
+			</tr>
+			<tr>
+				<td id="formInfo">Is Pay-to-Play?</td>
+				<td id="formField">
+					<input id="formInfoP2PCheck" type="checkbox" class="form-check-input" onclick="toggleP2P()" th:field="*{payToPlay}" th:value="${payToPlay}"></input>
+				</td>
+				<td></td>
+			</tr>
+			<tr id="P2PDetails" style="display:none;">
+				<td id="formInfo">Pay Details: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{payDetails}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('payDetails')}" th:errors="*{payDetails}"></td>				
+			</tr>
+			<tr>
+				<td id="formInfo">Has Homebrew Content?</td>
+				<td id="formField"><input type="checkbox" class="form-check-input" th:field="*{homebrew}" th:value="${homebrew}"></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td id="formInfo">Has Third Party Content?</td>
+				<td id="formField"><input type="checkbox" class="form-check-input" th:field="*{thirdParty}" th:value="${thirdParty}"></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td id="formInfo">Is Remote?</td>
+				<td id="formField">
+					<input id="formInfoRemoteCheck" type="checkbox" class="form-check-input" onclick="toggleRemote()" th:field="*{remote}" th:value="${remote}"></input>
+				</td>
+				<td></td>
+			</tr>
+			<tr id="remoteDetails" style="display:none;">
+				<td id="formInfo">Service Name: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{serviceName}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('serviceName')}" th:errors="*{serviceName}"></td>
+			</tr>
+			<tr id="remoteDetails" style="display:none;">
+				<td id="formInfo">Service URL: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{serviceUrl}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('serviceUrl')}" th:errors="*{serviceUrl}"></td>
+			</tr>
+			<tr id="addressDetails">
+				<td id="formInfo">Address Line 1: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{line1}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('line1')}" th:errors="*{line1}"></td>
+			</tr>
+			<tr id="addressDetails">
+				<td id="formInfo">Address Line 2: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{line2}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('line2')}" th:errors="*{line2}"></td>
+			</tr>
+			<tr id="addressDetails">
+				<td id="formInfo">Address Line 3: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{line3}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('line3')}" th:errors="*{line3}"></td>
+			</tr>
+			<tr id="addressDetails">
+				<td id="formInfo">City: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{city}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></td>
+			</tr>
+			<tr id="addressDetails">
+				<td id="formInfo">County or Province: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{countyProvince}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('countyProvince')}" th:errors="*{countyProvince}"></td>
+			</tr>
+			<tr id="addressDetails">
+				<td id="formInfo">Zip/Postcode: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{zipPostcode}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('zipPostcode')}" th:errors="*{zipPostcode}"></td>
+			</tr>
+			<tr id="addressDetails">
+				<td id="formInfo">Country: </td>
+				<td id="formField">
+					<select class="form-control" th:field="*{country}">
+						<option value=""/></option>
+						<option th:each="country : ${countries}" th:value="${country}" th:text="${country}"/>
+					</select>
+				</td>
+				<td id="formError" th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></td>
+			</tr>
+			<tr id="addressDetails">
+				<td id="formInfo">Other Address Info: </td>
+				<td id="formField"><input type="text" class="form-control" th:field="*{otherDetails}" /></td>
+				<td id="formError" th:if="${#fields.hasErrors('otherDetails')}" th:errors="*{otherDetails}"></td>
+			</tr>
+			<tr>
+				<td id="formInfo">Lobby Details: </td>
+				<td id="formField"><textarea th:field="*{details}" class="form-control" rows="5" cols="64"></textarea></td>
+				<td id="formError" th:if="${#fields.hasErrors('details')}" th:errors="*{details}"></td>
+			</tr>
+		</table>
+		<button type="submit">Create your Lobby!</button>
+	</form>
+</body>
+
+<div th:replace="~{fragments/Footer :: footer}"></div>
+
+<script type="text/javascript">
+function toggleP2P() {
+	var checkBox = document.getElementById("formInfoP2PCheck");
+	var tableRow = document.getElementById("P2PDetails");
+	if(checkBox.checked == true) {
+		tableRow.style.display = "table-row";
+	}
+	else {
+		tableRow.style.display = "none";
+	}
+}
+
+function toggleRemote() {
+	var checkBox = document.getElementById("formInfoRemoteCheck");
+	var remoteRows = document.querySelectorAll("[id=remoteDetails]");
+	var addressRows = document.querySelectorAll("[id=addressDetails]");
+	if(checkBox.checked == true) {
+		for(var i = 0; i < remoteRows.length; i++) {
+			remoteRows[i].style.display = "table-row";
+		}
+		for(var i = 0; i < addressRows.length; i++) {
+			addressRows[i].style.display = "none";
+		}
+	}
+	else {
+		for(var i = 0; i < remoteRows.length; i++) {
+			remoteRows[i].style.display = "none";
+		}
+		for(var i = 0; i < addressRows.length; i++) {
+			addressRows[i].style.display = "table-row";
+		}
+	}
+}
+</script>
+
+</html>

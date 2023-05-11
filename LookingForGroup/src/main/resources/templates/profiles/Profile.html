@@ -1,0 +1,171 @@
+<!-- src/main/resources/templates/profiles/Profile.html -->
+<!DOCTYPE HTML>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title th:text="'Viewing Profile - ID:' + ${profile.id}"></title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/css/bootstrap-select.min.css"/>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+</head>
+
+<div th:replace="~{fragments/Header :: header}"></div>
+
+<body style="padding-top: 3.5rem; padding-bottom: 3.5rem;">
+	<div class="d-flex p-2 justify-content-center text-center">
+		<h1 th:text = "${profile.username}"></h1>
+	</div>
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-md w-15">
+				<table>
+					<tr>
+						<th style="vertical-align:top;">
+							<button id="toggleBio" th:onclick="toggleBio([[${profile.bio}]])"
+									class="bi bi-chevron-right"
+									style="background-color:#CEA848; color:white;"></button>
+							Bio:
+						</th>
+						<td style="word-wrap: break-word; max-width: 50px;">
+							<div th:if="${#strings.isEmpty(profile.bio)}">
+								<div id="bio" class="overflow-auto"
+									 style="white-space: pre-wrap; max-width: 300px; max-height: 200px;"
+									 th:text = "'N/A'"/>								
+							</div>
+							<div th:unless="${#strings.isEmpty(profile.bio)}">
+								<div id="bio" class="overflow-auto" th:if="${#strings.length(profile.bio)<24}"
+									 style="white-space: pre-wrap; max-width: 300px; max-height: 200px;"
+									 th:text = "${profile.bio} ?: 'N/A'"/>
+								<div id="bio" class="overflow-auto" th:unless="${#strings.length(profile.bio)<24}"
+									 style="white-space: pre-wrap; max-width: 300px; max-height: 200px;"
+									 th:text = "${#strings.substring(profile.bio, 0, 23)} + '...'"/>		
+							</div>	
+						</td>
+					</tr>
+					<tr>
+						<th style="vertical-align:top;">
+							<button id="toggleInterests" th:onclick="toggleInterests([[${profile.interests}]])"
+									class="bi bi-chevron-right"
+									style="background-color:#CEA848; color:white;"></button>
+							Interests:
+						</th>
+						<td style="word-wrap: break-word; max-width: 50px;">
+							<div th:if="${#strings.isEmpty(profile.interests)}">
+								<div id="interests" class="overflow-auto"
+									 style="white-space: pre-wrap; max-width: 300px; max-height: 200px;"
+									 th:text = "'N/A'"/>								
+							</div>
+							<div th:unless="${#strings.isEmpty(profile.interests)}">
+								<div id="interests" class="overflow-auto" th:if="${#strings.length(profile?.interests)<24}"
+									 style="white-space: pre-wrap; max-width: 300px; max-height: 200px;"
+									 th:text = "${profile.interests} ?: 'N/A'"/>
+								<div id="interests" class="overflow-auto" th:unless="${#strings.length(profile?.interests)<24}"
+									 style="white-space: pre-wrap; max-width: 300px; max-height: 200px;"
+									 th:text = "${#strings.substring(profile.interests, 0, 23)} + '...'"/>				
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th style="width:  8.33%"> Gender: </th>
+						<td th:text = "${profile.gender} ?: 'N/A'"/>
+					</tr>
+					<tr>
+						<th style="width:  8.33%"> Nationality: </th>
+						<td th:text = "${profile.nationality} ?: 'N/A'"/>
+					</tr>	
+					<tr>
+						<td colspan="2">
+							<table>
+								<tr>
+									<td>
+										<button th:disabled="${owner == false}" class="btn" style="background-color:#CEA848; color:white;">
+											<a href="/profile/update" th:disabled="${owner == false}" style="background-color:#CEA848; color:white; text-decoration:none;">
+												Update Profile
+											</a>
+										</button>
+									</td>
+									<td>
+										<form action="#" th:action="@{'/profile/sendrequest' (id = ${profile.id})}" method="post">
+											<button th:disabled="${isFriends == true}" type="submit" class="btn" style="background-color:#CEA848; color:white;">Send Friend Request</button>
+										</form>
+									</td>
+									<td>
+										<form action="#" th:action="@{'/profile/block' (id = ${profile.id})}" method="post">
+											<button th:disabled="${isFriends == true}" type="submit" class="btn" style="background-color:#CEA848; color:white;">Block User</button>
+										</form>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="2">
+										<a th:if="${owner == true}" href="/profile/social?form=friended">
+											<button class="btn" style="background-color:#CEA848; color:white;">Manage Friends/Blocked</button>
+										</a>								
+									</td>
+								</tr>
+							</table>
+							
+							<div th:if="${owner == true}">
+								<table>
+									<tr>
+										<td th:text="'You have ' + ${#lists.size(profile.receivedFriendRequests)} + ' pending received friend requests!'"></td>
+									</tr>
+									<tr>
+										<td th:text="'You have ' + ${#lists.size(profile.sentFriendRequests)} + ' pending sent friend requests!'"></td>
+									</tr>
+								</table>
+							</div>
+							
+							<table>
+								<tr>
+									<th>Friends List</th>
+								</tr>
+								<tr th:each="friend : ${profile.friends}">
+									<td><a th:text="${friend.recipientUsername}" th:href="@{'/profile' (id=${friend.recipientId})}">Link</a></td>
+								</tr>
+							</table>
+						</td>
+					</tr>		
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+
+<div th:replace="~{fragments/Footer :: footer}"></div>
+
+<script>
+	var lessBio = true;
+	var lessInterests = true;
+	
+	function toggleBio(bio) {
+		if(lessBio == true) {
+			var bio = document.getElementById("bio").innerHTML = bio;
+			var togglebio = document.getElementById("toggleBio").className = "bi bi-chevron-down";
+			lessBio = false;
+		}
+		else {
+			var bio = document.getElementById("bio").innerHTML = bio.substring(0,23) + "...";
+			var togglebio = document.getElementById("toggleBio").className = "bi bi-chevron-right";
+			lessBio = true;
+		}
+	}
+	
+	function toggleInterests(interests) {
+		if(lessInterests == true) {
+			var interests = document.getElementById("interests").innerHTML = interests;
+			var toggleinterests = document.getElementById("toggleInterests").className = "bi bi-chevron-down";
+			lessInterests = false;
+		}
+		else {
+			var interests = document.getElementById("interests").innerHTML = interests.substring(0,23) + "...";
+			var toggleinterests = document.getElementById("toggleInterests").className = "bi bi-chevron-right";
+			lessInterests = true;
+		}
+	}
+</script>
+
+</html>

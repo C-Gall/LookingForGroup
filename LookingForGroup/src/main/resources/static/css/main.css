@@ -1,0 +1,10 @@
+.selectCheckbox option::before {
+  content: "\2610";
+  width: 1.3em;
+  text-align: center;
+  display: inline-block;
+}
+
+.selectCheckbox option:checked::before {
+  content: "\2611";
+}
